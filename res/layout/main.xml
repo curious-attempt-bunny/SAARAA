@@ -4,9 +4,19 @@
     android:layout_height="fill_parent" android:orientation="vertical">
 	<TextView android:text="Category" android:id="@+id/textView1" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
 	<Spinner android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/category"></Spinner>
+	<!-- 
 	<TextView android:text="FireCategory" android:id="@+id/textView2" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
 	<Spinner android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/fireCategory"></Spinner>
-		
+	 -->
+	
+	<TextView android:text="Severity Level" android:id="@+id/textView3" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
+	<Spinner android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/severityLevel"></Spinner>
+	
+	<CheckBox android:text="Are People Trapped" android:id="@+id/peopleTrapped" android:layout_width="wrap_content" android:layout_height="wrap_content"></CheckBox>
+
+	<TextView android:text="What Do You See?" android:id="@+id/textView4" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
+	<EditText android:id="@+id/whatDoYouSee" android:layout_height="wrap_content" android:layout_width="fill_parent" android:text=""></EditText>
+
 	<Button android:text="Submit Report" android:id="@+id/submitButton" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
     
 </LinearLayout>
