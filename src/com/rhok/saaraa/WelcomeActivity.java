@@ -1,5 +1,19 @@
 package com.rhok.saaraa;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
@@ -17,7 +31,7 @@ public class WelcomeActivity extends Activity {
 	    super.onCreate(savedInstanceState);
 	    setContentView(R.layout.main);
 
-	    Spinner categories = initSpinner(R.id.category, CATEGORIES);
+	    final Spinner categories = initSpinner(R.id.category, CATEGORIES);
 	    //Spinner fireCategories = initSpinner(R.id.fireCategory, FIRE_CATEGORIES);
 	    initSpinner(R.id.severityLevel, SEVERITY_LEVEL);
 	    
@@ -36,7 +50,23 @@ public class WelcomeActivity extends Activity {
 	    final Button button = (Button) findViewById(R.id.submitButton);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                toast(v, "Send report to server");
+                // Create a new HttpClient and Post Header
+                HttpClient httpclient = new DefaultHttpClient();
+                HttpPost httppost = new HttpPost("http://saaraa.heroku.com/reports");
+
+                try {
+                	String json = "{\"Event Category\":\""+categories.getSelectedItem().toString()+"\"}";
+					httppost.setEntity(new StringEntity(json));
+
+                    // Execute HTTP Post Request
+                    HttpResponse response = httpclient.execute(httppost);
+                } catch (ClientProtocolException e) {
+                    throw new RuntimeException(e);
+                } catch (IOException e) {
+                	throw new RuntimeException(e);
+                }
+
+                toast(v, "Sent report to server");
             }
         });
 
