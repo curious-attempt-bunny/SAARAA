@@ -1,22 +1,21 @@
 package com.rhok.saaraa;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.content.Context;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -24,8 +23,8 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class WelcomeActivity extends Activity {
@@ -33,11 +32,14 @@ public class WelcomeActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
 	    setContentView(R.layout.main);
-
+	    
 	    final Spinner categories = initSpinner(R.id.category, CATEGORIES);
 	    //Spinner fireCategories = initSpinner(R.id.fireCategory, FIRE_CATEGORIES);
 	    final Spinner severityLevel = initSpinner(R.id.severityLevel, SEVERITY_LEVEL);
 	    final EditText whatDoYouSee = (EditText) findViewById(R.id.whatDoYouSee);
+	    LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+	    final TextView textLocation = (TextView) findViewById(R.id.textLocation);
+	    final Button button = (Button) findViewById(R.id.submitButton);
 	    
 	    categories.setOnItemSelectedListener(new OnItemSelectedListener() {
 	    	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -50,7 +52,28 @@ public class WelcomeActivity extends Activity {
 			}
 		});
 	    
-	    final Button button = (Button) findViewById(R.id.submitButton);
+	    final Location[] currentLocation = new Location[1];
+	    // Define a listener that responds to location updates
+	    LocationListener locationListener = new LocationListener() {
+	        public void onLocationChanged(Location location) {
+	        	if (currentLocation[0] == null) {
+	        		toast(getCurrentFocus(), "Geo-location determined");
+		        	textLocation.setText("What's your location? (optional, we have your GPS location)");
+	        	}
+	        	// Called when a new location is found by the network location provider.
+	        	currentLocation[0] = location;
+	        }
+
+	        public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+	        public void onProviderEnabled(String provider) {}
+
+	        public void onProviderDisabled(String provider) {}
+	      };
+
+	    // Register the listener with the Location Manager to receive location updates
+	    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+	    
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Create a new HttpClient and Post Header
