@@ -13,6 +13,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -21,6 +23,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -33,7 +36,8 @@ public class WelcomeActivity extends Activity {
 
 	    final Spinner categories = initSpinner(R.id.category, CATEGORIES);
 	    //Spinner fireCategories = initSpinner(R.id.fireCategory, FIRE_CATEGORIES);
-	    initSpinner(R.id.severityLevel, SEVERITY_LEVEL);
+	    final Spinner severityLevel = initSpinner(R.id.severityLevel, SEVERITY_LEVEL);
+	    final EditText whatDoYouSee = (EditText) findViewById(R.id.whatDoYouSee);
 	    
 	    categories.setOnItemSelectedListener(new OnItemSelectedListener() {
 	    	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -52,10 +56,14 @@ public class WelcomeActivity extends Activity {
                 // Create a new HttpClient and Post Header
                 HttpClient httpclient = new DefaultHttpClient();
                 HttpPost httppost = new HttpPost("http://saaraa.heroku.com/reports");
-
+                JSONObject json = new JSONObject();
                 try {
-                	String json = "{\"Event Category\":\""+categories.getSelectedItem().toString()+"\"}";
-					httppost.setEntity(new StringEntity(json));
+                	json.put("Event Category", categories.getSelectedItem().toString());
+                	json.put("Severity Level", severityLevel.getSelectedItem().toString());
+                	json.put("What do you see", whatDoYouSee.getText());
+                	String x = json.toString();
+                	StringEntity se = new StringEntity( json.toString());  
+                    httppost.setEntity(se);
 
                     // Execute HTTP Post Request
                     HttpResponse response = httpclient.execute(httppost);
@@ -63,7 +71,9 @@ public class WelcomeActivity extends Activity {
                     throw new RuntimeException(e);
                 } catch (IOException e) {
                 	throw new RuntimeException(e);
-                }
+                } catch (JSONException e) {
+                	throw new RuntimeException(e);
+				}
 
                 toast(v, "Sent report to server");
             }
