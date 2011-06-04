@@ -36,14 +36,13 @@ public class WelcomeActivity extends Activity {
 	    initSpinner(R.id.severityLevel, SEVERITY_LEVEL);
 	    
 	    categories.setOnItemSelectedListener(new OnItemSelectedListener() {
-			@Override
-			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+	    	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 				String toast = "The category is " +
 		        	parent.getItemAtPosition(position).toString();
 				toast(parent, toast);
 			}
-			@Override
-			public void onNothingSelected(AdapterView<?> arg0) {
+			
+	    	public void onNothingSelected(AdapterView<?> arg0) {
 			}
 		});
 	    
