@@ -15,9 +15,11 @@ public final class R {
     }
     public static final class id {
         public static final int category=0x7f050001;
+        public static final int location=0x7f050008;
         public static final int peopleTrapped=0x7f050004;
         public static final int severityLevel=0x7f050003;
-        public static final int submitButton=0x7f050007;
+        public static final int submitButton=0x7f050009;
+        public static final int textLocation=0x7f050007;
         public static final int textView1=0x7f050000;
         public static final int textView3=0x7f050002;
         public static final int textView4=0x7f050005;
