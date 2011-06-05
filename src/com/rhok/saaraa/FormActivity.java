@@ -1,7 +1,10 @@
 package com.rhok.saaraa;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -12,6 +15,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.FileBody;
@@ -23,8 +27,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,10 +44,12 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 
 public class FormActivity extends Activity {
+	private static final SimpleDateFormat FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
 	private String imageShackAPIKey = "57AFJOQW33e358bbe3e44578402635508a6236ca";
 	
     private RelativeLayout container;
@@ -47,6 +58,7 @@ public class FormActivity extends Activity {
 	private List<String> options;
 	private List<String> imageFilenames = new ArrayList<String>();
 	private List<String> imageUrls = new ArrayList<String>();
+	protected Location currentLocation;
 
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -66,6 +78,21 @@ public class FormActivity extends Activity {
 		items.add(item);
 
 		addEventCategory();
+		
+	    LocationListener locationListener = new LocationListener() {
+	        public void onLocationChanged(Location location) {
+	        	currentLocation = location;
+	        }
+
+	        public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+	        public void onProviderEnabled(String provider) {}
+
+	        public void onProviderDisabled(String provider) {}
+		  };
+		
+		  LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+		  locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 	}
 
 	private void addEventCategory() {
@@ -218,11 +245,18 @@ public class FormActivity extends Activity {
 		
 		EditText textEdit = new EditText(this);
         add(textEdit);
+        Value value;
+        value = new Value("description");
+        value.setSource(textEdit);
+        items.get(items.size()-1).add(value);
         
 		label("Where are you?");
 		
 		textEdit = new EditText(this);
         add(textEdit);
+        value = new Value("location.address");
+        value.setSource(textEdit);
+		items.get(items.size()-1).add(value);
         
         Button addPhotoButton = new Button(this);
         addPhotoButton.setText("Add Photo");
@@ -249,25 +283,72 @@ public class FormActivity extends Activity {
         
         submitButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View arg0) {
-				buildJson();
+				String json = buildJson();
+				
+				postJson(json);
 			}
+
+
 		});
 	}
 	
-
-	protected void buildJson() {
+	protected String buildJson() {
 		try {
 			JSONObject json = new JSONObject();
+			JSONObject metadata = new JSONObject();
+			json.put("metadata", metadata);
+        	JSONObject loc = new JSONObject();
+			json.put("location", loc);
+        	
 			for(Item item : items) {
 				for(Value value : item.getValues()) {
 					value.populate(json);
 				}
 			}
-			String serialized = json.toString();
-			int dummy = 5;
+			json.put("captured", FORMAT.format(new Date()));
+			json.put("submitted", FORMAT.format(new Date()));
+			JSONObject reporter = new JSONObject();
+        	reporter.put("phone", getCellPhone());
+        	json.put("reporter", reporter);
+        	
+        	if ( currentLocation != null ) {
+        		double currentLatitude = currentLocation.getLatitude();
+        		double currentLongitude = currentLocation.getLongitude();
+        		loc.put("latitude", currentLatitude);
+        		loc.put("longitude", currentLongitude);
+        	}
+        	
+			return json.toString();
 		} catch (JSONException e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	private void postJson(String json) {
+		Log.d("JSON", json);
+		try {
+			HttpClient httpclient = new DefaultHttpClient();
+			HttpPost httppost = new HttpPost("http://saaraa.heroku.com/reports");
+			StringEntity se = new StringEntity( json );  
+			httppost.setEntity(se);
+			HttpResponse response = httpclient.execute(httppost);
+			if (response.getStatusLine().getStatusCode() == 200) {
+				message("Report submitted");
+			} else {
+				message("Report failed to submit");
+			}
+			//message("Json "+json+" Response "+response.getStatusLine().getStatusCode()+" "+response.getStatusLine().getReasonPhrase());
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+	private void message(String string) {
+		Toast.makeText(this, string, Toast.LENGTH_LONG).show();
+	}
+
+	public String getCellPhone() {
+		TelephonyManager telephonyManager = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
+		return telephonyManager.getLine1Number();
 	}
 
 	protected void submitImages() {
@@ -315,7 +396,7 @@ public class FormActivity extends Activity {
 	private void addSpinner(Value stringValue) {
 		Spinner spinner = new Spinner(this);
 		List<String> selections = new ArrayList<String>();
-		selections.add("Select one...");
+		//selections.add("Select one...");
 		selections.addAll(options);
 		ArrayAdapter<CharSequence> adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, selections.toArray(new String[]{}));
 	    spinner.setAdapter(adapter);
