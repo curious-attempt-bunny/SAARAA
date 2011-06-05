@@ -14,7 +14,6 @@ public final class R {
         public static final int icon=0x7f020000;
     }
     public static final class id {
-        public static final int addPhoto=0x7f050009;
         public static final int layout=0x7f050000;
         public static final int preview=0x7f050001;
     }
