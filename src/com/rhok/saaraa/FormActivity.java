@@ -1,14 +1,29 @@
 package com.rhok.saaraa;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -26,7 +41,9 @@ public class FormActivity extends Activity {
 	private List<Item> items;
 	private Map<String, Runnable> mapValueToAction;
 	private List<String> options;
-	
+	private List<String> imageFilenames = new ArrayList<String>();
+	private List<String> imageUrls = new ArrayList<String>();
+
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,13 +136,62 @@ public class FormActivity extends Activity {
         
         Button submitButton = new Button(this);
         submitButton.setText("Submit Report");
+        
+        submitButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				submitImages();
+			}
+		});
+
         add(submitButton);
 	}
 	
+	protected void submitImages() {
+		for (String filename : imageFilenames) {
+			try {
+				HttpClient httpclient = new DefaultHttpClient();
+				HttpPost httppost = new HttpPost("http://www.imageshack.us/upload_api.php");
+				
+				List<NameValuePair> params = new ArrayList<NameValuePair>();
+	            params.add(new BasicNameValuePair("key", imageShackAPIKey));
+	            params.add(new BasicNameValuePair("rembar", "1"));
+	            params.add(new BasicNameValuePair("public", "0"));
+	            
+	            StringBody stringBody = new StringBody(params.toString());
+	            
+	            FileBody bin = new FileBody(new File(filename), "image/jpeg");
+	            MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);  
+	            reqEntity.addPart("fileupload", bin);
+	            reqEntity.addPart("", stringBody);
+	            
+	            httppost.setEntity(reqEntity);
+	            
+                Log.i("IMAGE_UPLOAD", "uploading " + filename);
+
+	            HttpResponse response = httpclient.execute(httppost);  
+	            HttpEntity resEntity = response.getEntity();  
+	            if (resEntity != null) {
+	            	String responseString = EntityUtils.toString(resEntity);
+	                Log.i("IMAGE_UPLOAD", responseString);
+	                
+	                String url = responseString.split("<image_link>")[1].split("</image_link>")[0];
+	                imageUrls.add(url);
+	            }
+			}
+			catch (Exception e) {
+				Log.e("IMAGE_UPLOAD", e.getMessage());
+			}
+		}
+		
+		for (String url : imageUrls) {
+			Log.i("IMAGES", url);
+		}
+	}
+
 	private void addSpinner() {
 		Spinner spinner = new Spinner(this);
 		List<String> selections = new ArrayList<String>();
-		selections.add("Select one...");
+//		selections.add("Select one...");
 		selections.addAll(options);
 		ArrayAdapter<CharSequence> adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, selections.toArray(new String[]{}));
 	    spinner.setAdapter(adapter);
@@ -172,7 +238,6 @@ public class FormActivity extends Activity {
 	}
 
 	int index = 1;
-	private List<String> filenames = new ArrayList<String>();
 	
 	private void add(final View child) {
 		LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -188,7 +253,7 @@ public class FormActivity extends Activity {
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		filenames.add(data.getStringExtra("com.rhok.saaraa.FileName"));
+		imageFilenames.add(data.getStringExtra("com.rhok.saaraa.FileName"));
 	}
 
 }
