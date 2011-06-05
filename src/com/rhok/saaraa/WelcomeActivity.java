@@ -22,6 +22,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -36,9 +37,11 @@ public class WelcomeActivity extends Activity {
 	    final Spinner categories = initSpinner(R.id.category, CATEGORIES);
 	    //Spinner fireCategories = initSpinner(R.id.fireCategory, FIRE_CATEGORIES);
 	    final Spinner severityLevel = initSpinner(R.id.severityLevel, SEVERITY_LEVEL);
+	    final CheckBox peopleTrapped = (CheckBox) findViewById(R.id.peopleTrapped);
 	    final EditText whatDoYouSee = (EditText) findViewById(R.id.whatDoYouSee);
 	    LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 	    final TextView textLocation = (TextView) findViewById(R.id.textLocation);
+	    final EditText location = (EditText) findViewById(R.id.location);
 	    final Button button = (Button) findViewById(R.id.submitButton);
 	    
 	    categories.setOnItemSelectedListener(new OnItemSelectedListener() {
@@ -83,7 +86,16 @@ public class WelcomeActivity extends Activity {
                 try {
                 	json.put("Event Category", categories.getSelectedItem().toString());
                 	json.put("Severity Level", severityLevel.getSelectedItem().toString());
+                	String peopleTrappedString = new String();
+                	if ( peopleTrapped.isChecked() ) {
+                		peopleTrappedString = "Yes";
+                	} else {
+                		peopleTrappedString = "No";
+                	}
+                	json.put("Are there people trapped?", peopleTrappedString);
                 	json.put("What do you see", whatDoYouSee.getText());
+                	json.put("Location", location.getText());
+                	// added for debugging check on JSON string
                 	String x = json.toString();
                 	StringEntity se = new StringEntity( json.toString());  
                     httppost.setEntity(se);
