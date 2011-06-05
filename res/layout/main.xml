@@ -17,6 +17,8 @@
 	<TextView android:text="What Do You See?" android:id="@+id/textView4" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
 	<EditText android:id="@+id/whatDoYouSee" android:layout_height="wrap_content" android:layout_width="fill_parent" android:text=""></EditText>
 
+	<Button android:text="Add Photo" android:id="@+id/addPhoto" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+
 	<TextView android:text="What's your location? (GPS detection in progress)" android:id="@+id/textLocation" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
 	<EditText android:id="@+id/location" android:layout_height="wrap_content" android:layout_width="fill_parent" android:text=""></EditText>
 

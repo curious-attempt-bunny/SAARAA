@@ -13,6 +13,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -40,7 +41,8 @@ public class WelcomeActivity extends Activity {
 	    final EditText whatDoYouSee = (EditText) findViewById(R.id.whatDoYouSee);
 	    LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 	    final TextView textLocation = (TextView) findViewById(R.id.textLocation);
-	    final Button button = (Button) findViewById(R.id.submitButton);
+	    final Button addPhotoButton = (Button) findViewById(R.id.addPhoto);
+	    final Button submitButton = (Button) findViewById(R.id.submitButton);
 	    
 
 		  TelephonyManager telephonyManager = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
@@ -57,6 +59,8 @@ public class WelcomeActivity extends Activity {
 	    	public void onNothingSelected(AdapterView<?> arg0) {
 			}
 		});
+
+	    // TwiPic API Key: 44ca4886a1d4f4ab1003a6a109f8f2a8
 	    
 	    final Location[] currentLocation = new Location[1];
 	    // Define a listener that responds to location updates
@@ -77,12 +81,17 @@ public class WelcomeActivity extends Activity {
 	        public void onProviderDisabled(String provider) {}
 	      };
 
-	      
+	    addPhotoButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				Intent intent = new Intent(WelcomeActivity.this, CaptureActivity.class);
+		        startActivity(intent);
+			}
+		});
 	      
 	    // Register the listener with the Location Manager to receive location updates
 	    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 	    
-        button.setOnClickListener(new View.OnClickListener() {
+        submitButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Create a new HttpClient and Post Header
                 HttpClient httpclient = new DefaultHttpClient();
