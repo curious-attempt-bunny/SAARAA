@@ -1,6 +1,8 @@
 package com.rhok.saaraa;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -8,6 +10,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.HttpParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -92,6 +95,14 @@ public class WelcomeActivity extends Activity {
                 HttpPost httppost = new HttpPost("http://saaraa.heroku.com/reports");
                 JSONObject json = new JSONObject();
                 try {
+                	// "2011-06-04 16:58:04 -0700"
+                	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+                	Date now = new Date();
+                	String dateString = sdf.format(now);
+                	json.put("captured", dateString);
+                	JSONObject reporter = new JSONObject();
+                	reporter.put("phone", cellNumber);
+                	json.put("reporter", reporter);
                 	json.put("category", categories.getSelectedItem().toString());
                 	json.put("severity", severityLevel.getSelectedItem().toString());
                 	String peopleTrappedString = new String();
@@ -122,6 +133,12 @@ public class WelcomeActivity extends Activity {
 
                     // Execute HTTP Post Request
                     HttpResponse response = httpclient.execute(httppost);
+                    int i = 1;
+                    HttpParams params = response.getParams();
+                    if ( response.getStatusLine().getStatusCode() != 200 ) {
+                    	// todo: handle errors
+                    }
+                    int j = i + 1;
                 } catch (ClientProtocolException e) {
                     throw new RuntimeException(e);
                 } catch (IOException e) {
