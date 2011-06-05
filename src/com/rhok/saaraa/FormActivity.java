@@ -28,6 +28,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
@@ -66,14 +67,90 @@ public class FormActivity extends Activity {
 
 	private void addEventCategory() {
 		label("Event Category");
-        addOption("Fire", new Runnable() { public void run() { addFireCategory(); } });
+        addOption("Fire", new Runnable() { public void run() {
+        	addArePeopleTrapped();
+    		addArePeopleInjured();
+    		addSeverity( new Runnable() { public void run() { addFireCategory(); } } );
+        } });
+        addOption("Flood", new Runnable() { public void run() {
+        	addArePeopleTrapped();
+    		addArePeopleInjured();
+    		addSeverity( new Runnable() { public void run() {
+    			checkBox("Houses in Flood?");
+    			checkBox("Over Roadway?");
+    			label("Levee");
+    			checkBox("Damage?");
+    			checkBox("Overtopping?");
+    			checkBox("Failure/Breach?");
+    			label("Dam");
+    			checkBox("Damage?");
+    			checkBox("Overtopping?");
+    			checkBox("Failure/Breach?");
+    			addLocation();
+    		} } );
+        } });
+        addOption("Gas Leak", new Runnable() { public void run() {
+        	addArePeopleTrapped();
+    		addArePeopleInjured();
+    		addSeverity( new Runnable() { public void run() { 
+    			checkBox("Visible or Audible Source?");
+    			checkBox("Is There Fire?");
+    			checkBox("Are structures threatened?");
+    			addLocation();
+    		} } );
+        } });
+        addOption("Downed Power Line", new Runnable() { public void run() {
+        	addArePeopleTrapped();
+    		addArePeopleInjured();
+    		addSeverity( new Runnable() { public void run() { 
+    			checkBox("Is There Sparking?");
+    			label("Is the Line...");
+    			Runnable action = new Runnable() {
+    				public void run() {
+    					checkBox("Is the Line Touching a Vehicle With People Inside?");
+    					addLocation();
+    				}
+    			};
+    			addOption("On the Road", action);
+    			addOption("Front Yard", action);
+    			addOption("Back Yard", action);
+    			addSpinner();
+    		} } );
+        } });
+//        addOption("Severe Weather", new Runnable() { public void run() {
+//        	// TODO
+//        } });
+        addOption("Earthquake", new Runnable() { public void run() {
+        	addArePeopleTrapped();
+    		addArePeopleInjured();
+    		addBuildingType(new Runnable() {
+    			public void run() {
+    				checkBox("Is There Fire?");
+    				addSeverity(new Runnable() {
+    					public void run() {
+    						checkBox("Are Structures Threatened?");
+    						addLocation();
+    					}
+					} );
+    			}
+    		});
+        } });
         addSpinner();
-//		spinner("Fire", "Flood", "Gas Leak", "Downed Power Line", "Severe Weather", "Earthquake", "Zombie Apocalypse", "Other");
+	}
+
+	protected void addSeverity(Runnable action) {
+		label("Severity Level");
+		addOption("Green", action);
+		addOption("Yellow", action);
+		addOption("Red", action);
+		addSpinner();
 	}
 
 	private void addFireCategory() {
 		label("Fire Category");
-		addOption("Building", new Runnable() { public void run() { addBuildingType(); } });
+		addOption("Building", new Runnable() { public void run() { addBuildingType(
+				new Runnable() { public void run() { addLocation(); } }
+		); } });
 		addOption("Grass/Forest", new Runnable() { public void run() { addLocation(); } });
 		addOption("Vehicle", new Runnable() { public void run() { addLocation(); } });
 		addOption("Boat / Marina / Dock", new Runnable() { public void run() { addLocation(); } });
@@ -81,9 +158,26 @@ public class FormActivity extends Activity {
         addSpinner();
 	}
 	
-	private void addBuildingType() {
+	private void addArePeopleInjured() {
+		String label = "Are People Injured?";
+		checkBox(label);
+	}
+
+	private void checkBox(String label) {
+		CheckBox checkBox = new CheckBox(this);
+		checkBox.setText(label);
+		add(checkBox);
+	}
+
+	private void addArePeopleTrapped() {
+		CheckBox checkBox = new CheckBox(this);
+		checkBox.setText("Are People Trapped?");
+		add(checkBox);
+	}
+
+	private void addBuildingType(final Runnable lastAction) {
 		label("Building Type");
-		addOption("Public", new Runnable() { public void run() { addBuildings(
+		addOption("Public", new Runnable() { public void run() { addBuildings( lastAction,
 				"Fire station",
 		        "Police",
 		        "Hospital",
@@ -92,22 +186,22 @@ public class FormActivity extends Activity {
 		        "Community center",
 		        "Services (gas, power, water)",
 		        "Other"); } });
-		addOption("Private", new Runnable() { public void run() { addBuildings(
+		addOption("Private", new Runnable() { public void run() { addBuildings( lastAction,
 				"Warehouse",
 		        "Office - single level",
 		        "Office - high rise"); } });
-		addOption("Residential", new Runnable() { public void run() { addBuildings(
+		addOption("Residential", new Runnable() { public void run() { addBuildings( lastAction,
 				"Single family house",
 		        "Apartment building",
 		        "High rise"); } });
 		addSpinner();
 	}
 	
-	private void addBuildings(String... buildings) {
+	private void addBuildings(final Runnable lastAction, String... buildings) {
 		label("Building");
 		Runnable action = new Runnable() {
 			public void run() {
-				addLocation();
+				lastAction.run();
 			}
 		};
         for(String building : buildings) {
@@ -117,9 +211,14 @@ public class FormActivity extends Activity {
 	}
 	
 	private void addLocation() {
-		label("Where are you?");
+		label("What do you see?");
 		
 		EditText textEdit = new EditText(this);
+        add(textEdit);
+        
+		label("Where are you?");
+		
+		textEdit = new EditText(this);
         add(textEdit);
         
         Button addPhotoButton = new Button(this);
@@ -191,7 +290,7 @@ public class FormActivity extends Activity {
 	private void addSpinner() {
 		Spinner spinner = new Spinner(this);
 		List<String> selections = new ArrayList<String>();
-//		selections.add("Select one...");
+		selections.add("Select one...");
 		selections.addAll(options);
 		ArrayAdapter<CharSequence> adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, selections.toArray(new String[]{}));
 	    spinner.setAdapter(adapter);
