@@ -1,7 +1,6 @@
 package com.rhok.saaraa;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,6 +22,7 @@ import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -272,17 +272,12 @@ public class FormActivity extends Activity {
         
         Button submitButton = new Button(this);
         submitButton.setText("Submit Report");
-        
-        submitButton.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				submitImages();
-			}
-		});
 
         add(submitButton);
         
         submitButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View arg0) {
+				submitImages();
 				String json = buildJson();
 				
 				postJson(json);
@@ -310,6 +305,8 @@ public class FormActivity extends Activity {
 			JSONObject reporter = new JSONObject();
         	reporter.put("phone", getCellPhone());
         	json.put("reporter", reporter);
+        	JSONArray photos = new JSONArray(imageUrls);
+        	json.put("photos", photos);
         	
         	if ( currentLocation != null ) {
         		double currentLatitude = currentLocation.getLatitude();
