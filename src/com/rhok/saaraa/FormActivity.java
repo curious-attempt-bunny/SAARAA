@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 public class FormActivity extends Activity {
+	private String imageShackAPIKey = "57AFJOQW33e358bbe3e44578402635508a6236ca";
+	
     private RelativeLayout container;
 	private List<Item> items;
 	private Map<String, Runnable> mapValueToAction;
@@ -203,6 +206,14 @@ public class FormActivity extends Activity {
         
         Button addPhotoButton = new Button(this);
         addPhotoButton.setText("Add Photo");
+        
+	    addPhotoButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				Intent intent = new Intent(FormActivity.this, CaptureActivity.class);
+		        startActivityForResult(intent, 0);
+			}
+		});
+	      
         add(addPhotoButton);
         
         Button submitButton = new Button(this);
@@ -260,6 +271,7 @@ public class FormActivity extends Activity {
 	}
 
 	int index = 1;
+	private List<String> filenames = new ArrayList<String>();
 	
 	private void add(final View child) {
 		LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -272,4 +284,10 @@ public class FormActivity extends Activity {
 		container.addView(child, layoutParams);
 		items.get(items.size()-1).add(child);
 	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		filenames.add(data.getStringExtra("com.rhok.saaraa.FileName"));
+	}
+
 }

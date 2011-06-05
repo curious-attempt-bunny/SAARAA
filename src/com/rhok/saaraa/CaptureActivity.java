@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
@@ -87,6 +88,10 @@ public class CaptureActivity extends Activity implements Callback, OnClickListen
 				outStream.write(data);
 				outStream.close();
 				Log.d(TAG, "onPictureTaken - wrote bytes: " + data.length);
+				
+				Intent filenameData = new Intent();
+				filenameData.putExtra("com.rhok.saaraa.FileName", fullpath);
+				setResult(RESULT_OK, filenameData);
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
