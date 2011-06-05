@@ -42,6 +42,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -68,7 +69,11 @@ public class FormActivity extends Activity {
                 ViewGroup.LayoutParams.FILL_PARENT,
                 ViewGroup.LayoutParams.FILL_PARENT));
 
-        setContentView(container);
+        ScrollView scrollview = new ScrollView(this);
+        scrollview.setFillViewport(true);
+        scrollview.addView(container);
+        
+        setContentView(scrollview);
 
         items = new ArrayList<Item>();
         mapValueToAction = new LinkedHashMap<String, Runnable>();
