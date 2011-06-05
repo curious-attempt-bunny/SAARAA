@@ -1,6 +1,8 @@
 package com.rhok.saaraa;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -8,6 +10,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.HttpParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -24,6 +27,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -38,12 +42,13 @@ public class WelcomeActivity extends Activity {
 	    final Spinner categories = initSpinner(R.id.category, CATEGORIES);
 	    //Spinner fireCategories = initSpinner(R.id.fireCategory, FIRE_CATEGORIES);
 	    final Spinner severityLevel = initSpinner(R.id.severityLevel, SEVERITY_LEVEL);
+	    final CheckBox peopleTrapped = (CheckBox) findViewById(R.id.peopleTrapped);
 	    final EditText whatDoYouSee = (EditText) findViewById(R.id.whatDoYouSee);
 	    LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 	    final TextView textLocation = (TextView) findViewById(R.id.textLocation);
 	    final Button addPhotoButton = (Button) findViewById(R.id.addPhoto);
 	    final Button submitButton = (Button) findViewById(R.id.submitButton);
-	    
+	    final EditText locationText = (EditText) findViewById(R.id.location);
 
 		  TelephonyManager telephonyManager = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
 		  final String cellNumber = telephonyManager.getLine1Number();
@@ -98,15 +103,50 @@ public class WelcomeActivity extends Activity {
                 HttpPost httppost = new HttpPost("http://saaraa.heroku.com/reports");
                 JSONObject json = new JSONObject();
                 try {
-                	json.put("Event Category", categories.getSelectedItem().toString());
-                	json.put("Severity Level", severityLevel.getSelectedItem().toString());
-                	json.put("What do you see", whatDoYouSee.getText());
+                	// "2011-06-04 16:58:04 -0700"
+                	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+                	Date now = new Date();
+                	String dateString = sdf.format(now);
+                	json.put("captured", dateString);
+                	JSONObject reporter = new JSONObject();
+                	reporter.put("phone", cellNumber);
+                	json.put("reporter", reporter);
+                	json.put("category", categories.getSelectedItem().toString());
+                	json.put("severity", severityLevel.getSelectedItem().toString());
+                	String peopleTrappedString = new String();
+                	JSONObject peopleTrappedJSON = new JSONObject();
+                	peopleTrappedJSON.put("peopletrapped", peopleTrapped.isChecked());
+                	json.put("metadata", peopleTrappedJSON);
+                	json.put("description", whatDoYouSee.getText());
+                	JSONObject loc = new JSONObject();
+                	boolean hasLoc = false;
+                	String currentAddress = locationText.getText().toString();
+                	if ( currentAddress.length() > 0 ) {
+                		loc.put("address", currentAddress);
+                		hasLoc = true;
+                	}
+                	if ( currentLocation[0] != null ) {
+                		double currentLatitude = currentLocation[0].getLatitude();
+                		double currentLongitude = currentLocation[0].getLongitude();
+                		loc.put("latitude", currentLatitude);
+                		loc.put("longitude", currentLongitude);
+                		hasLoc = true;
+                	}
+                	if ( hasLoc ) 
+                		json.put("location", loc);
+                	// added for debugging check on JSON string
                 	String x = json.toString();
                 	StringEntity se = new StringEntity( json.toString());  
                     httppost.setEntity(se);
 
                     // Execute HTTP Post Request
                     HttpResponse response = httpclient.execute(httppost);
+                    int i = 1;
+                    HttpParams params = response.getParams();
+                    if ( response.getStatusLine().getStatusCode() != 200 ) {
+                    	// todo: handle errors
+                    }
+                    int j = i + 1;
                 } catch (ClientProtocolException e) {
                     throw new RuntimeException(e);
                 } catch (IOException e) {
