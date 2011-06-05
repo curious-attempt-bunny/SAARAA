@@ -41,7 +41,7 @@ public class WelcomeActivity extends Activity {
 	    final EditText whatDoYouSee = (EditText) findViewById(R.id.whatDoYouSee);
 	    LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 	    final TextView textLocation = (TextView) findViewById(R.id.textLocation);
-	    final EditText location = (EditText) findViewById(R.id.location);
+	    final EditText locationText = (EditText) findViewById(R.id.location);
 	    final Button button = (Button) findViewById(R.id.submitButton);
 	    
 	    categories.setOnItemSelectedListener(new OnItemSelectedListener() {
@@ -84,17 +84,29 @@ public class WelcomeActivity extends Activity {
                 HttpPost httppost = new HttpPost("http://saaraa.heroku.com/reports");
                 JSONObject json = new JSONObject();
                 try {
-                	json.put("Event Category", categories.getSelectedItem().toString());
-                	json.put("Severity Level", severityLevel.getSelectedItem().toString());
+                	json.put("category", categories.getSelectedItem().toString());
+                	json.put("severity", severityLevel.getSelectedItem().toString());
                 	String peopleTrappedString = new String();
-                	if ( peopleTrapped.isChecked() ) {
-                		peopleTrappedString = "Yes";
-                	} else {
-                		peopleTrappedString = "No";
+                	JSONObject peopleTrappedJSON = new JSONObject();
+                	peopleTrappedJSON.put("peopletrapped", peopleTrapped.isChecked());
+                	json.put("metadata", peopleTrappedJSON);
+                	json.put("description", whatDoYouSee.getText());
+                	JSONObject loc = new JSONObject();
+                	boolean hasLoc = false;
+                	String currentAddress = locationText.getText().toString();
+                	if ( currentAddress.length() > 0 ) {
+                		loc.put("address", currentAddress);
+                		hasLoc = true;
                 	}
-                	json.put("Are there people trapped?", peopleTrappedString);
-                	json.put("What do you see", whatDoYouSee.getText());
-                	json.put("Location", location.getText());
+                	if ( currentLocation[0] != null ) {
+                		double currentLatitude = currentLocation[0].getLatitude();
+                		double currentLongitude = currentLocation[0].getLongitude();
+                		loc.put("latitude", currentLatitude);
+                		loc.put("longitude", currentLongitude);
+                		hasLoc = true;
+                	}
+                	if ( hasLoc ) 
+                		json.put("location", loc);
                 	// added for debugging check on JSON string
                 	String x = json.toString();
                 	StringEntity se = new StringEntity( json.toString());  
