@@ -17,6 +17,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -44,11 +45,16 @@ public class WelcomeActivity extends Activity {
 	    final EditText locationText = (EditText) findViewById(R.id.location);
 	    final Button button = (Button) findViewById(R.id.submitButton);
 	    
+
+		  TelephonyManager telephonyManager = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
+		  final String cellNumber = telephonyManager.getLine1Number();
+	    
 	    categories.setOnItemSelectedListener(new OnItemSelectedListener() {
 	    	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-				String toast = "The category is " +
-		        	parent.getItemAtPosition(position).toString();
-				toast(parent, toast);
+				//String toast = "The category is " +
+		        //	parent.getItemAtPosition(position).toString();
+				//toast(parent, toast);
+				toast(getCurrentFocus(), "Your cell# is "+cellNumber);
 			}
 			
 	    	public void onNothingSelected(AdapterView<?> arg0) {
@@ -74,6 +80,8 @@ public class WelcomeActivity extends Activity {
 	        public void onProviderDisabled(String provider) {}
 	      };
 
+	      
+	      
 	    // Register the listener with the Location Manager to receive location updates
 	    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 	    
