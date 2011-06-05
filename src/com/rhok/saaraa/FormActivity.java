@@ -6,6 +6,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -97,7 +100,7 @@ public class FormActivity extends Activity {
     			addOption("On the Road", action);
     			addOption("Front Yard", action);
     			addOption("Back Yard", action);
-    			addSpinner();
+    			addSpinner(new Value("metadata.powerLineLocation"));
     		} } );
         } });
 //        addOption("Severe Weather", new Runnable() { public void run() {
@@ -118,7 +121,7 @@ public class FormActivity extends Activity {
     			}
     		});
         } });
-        addSpinner();
+        addSpinner(new Value("category"));
 	}
 
 	protected void addSeverity(Runnable action) {
@@ -126,7 +129,7 @@ public class FormActivity extends Activity {
 		addOption("Green", action);
 		addOption("Yellow", action);
 		addOption("Red", action);
-		addSpinner();
+		addSpinner(new Value("severity"));
 	}
 
 	private void addFireCategory() {
@@ -138,7 +141,7 @@ public class FormActivity extends Activity {
 		addOption("Vehicle", new Runnable() { public void run() { addLocation(); } });
 		addOption("Boat / Marina / Dock", new Runnable() { public void run() { addLocation(); } });
 		addOption("Other", new Runnable() { public void run() { addLocation(); } });
-        addSpinner();
+        addSpinner(new Value("metadata.fireCategory"));
 	}
 	
 	private void addArePeopleInjured() {
@@ -177,7 +180,7 @@ public class FormActivity extends Activity {
 				"Single family house",
 		        "Apartment building",
 		        "High rise"); } });
-		addSpinner();
+		addSpinner(new Value("metadata.buildingType"));
 	}
 	
 	private void addBuildings(final Runnable lastAction, String... buildings) {
@@ -190,7 +193,7 @@ public class FormActivity extends Activity {
         for(String building : buildings) {
         	addOption(building, action);
         }
-        addSpinner();
+        addSpinner(new Value("metadata.building"));
 	}
 	
 	private void addLocation() {
@@ -219,12 +222,33 @@ public class FormActivity extends Activity {
         Button submitButton = new Button(this);
         submitButton.setText("Submit Report");
         add(submitButton);
+        
+        submitButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View arg0) {
+				buildJson();
+			}
+		});
 	}
 	
-	private void addSpinner() {
+	protected void buildJson() {
+		try {
+			JSONObject json = new JSONObject();
+			for(Item item : items) {
+				for(Value value : item.getValues()) {
+					value.populate(json);
+				}
+			}
+			String serialized = json.toString();
+			int dummy = 5;
+		} catch (JSONException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void addSpinner(Value stringValue) {
 		Spinner spinner = new Spinner(this);
 		List<String> selections = new ArrayList<String>();
-		//selections.add("Select one...");
+//		selections.add("Select one...");
 		selections.addAll(options);
 		ArrayAdapter<CharSequence> adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, selections.toArray(new String[]{}));
 	    spinner.setAdapter(adapter);
@@ -242,6 +266,8 @@ public class FormActivity extends Activity {
 			}
 		});
 		add(spinner);
+		stringValue.setSource(spinner);
+		items.get(items.size()-1).add(stringValue);
 		mapValueToAction = new HashMap<String, Runnable>(); 
 		options = new ArrayList<String>();
 	}
