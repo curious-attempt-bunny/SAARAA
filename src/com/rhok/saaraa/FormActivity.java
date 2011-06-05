@@ -319,6 +319,10 @@ public class FormActivity extends Activity {
         		loc.put("latitude", currentLatitude);
         		loc.put("longitude", currentLongitude);
         	}
+        	else {
+        		loc.put("latitude", 47.646210);
+        		loc.put("longitude", -122.138750);
+        	}
         	
 			return json.toString();
 		} catch (JSONException e) {
@@ -336,6 +340,8 @@ public class FormActivity extends Activity {
 			HttpResponse response = httpclient.execute(httppost);
 			if (response.getStatusLine().getStatusCode() == 200) {
 				message("Report submitted");
+				imageFilenames.clear();
+				imageUrls.clear();
 			} else {
 				message("Report failed to submit");
 			}
@@ -398,7 +404,7 @@ public class FormActivity extends Activity {
 	private void addSpinner(Value stringValue) {
 		Spinner spinner = new Spinner(this);
 		List<String> selections = new ArrayList<String>();
-		//selections.add("Select one...");
+		selections.add("Select one...");
 		selections.addAll(options);
 		ArrayAdapter<CharSequence> adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, selections.toArray(new String[]{}));
 	    spinner.setAdapter(adapter);
