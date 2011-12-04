@@ -172,6 +172,18 @@ public class FormActivity extends Activity {
     			}
     		});
         } });
+        addOption("Pothole", new Runnable() { public void run() {
+			addLocation();
+        } });
+        addOption("Down Powerline", new Runnable() { public void run() {
+			addLocation();
+        } });
+        addOption("Debris", new Runnable() { public void run() {
+			addLocation();
+        } });
+        addOption("Other", new Runnable() { public void run() {
+			addLocation();
+        } });
         addSpinner(new Value("category"));
 	}
 
