@@ -1,6 +1,7 @@
 package com.rhok.saaraa;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,6 +13,7 @@ import java.util.Map;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -346,10 +348,15 @@ public class FormActivity extends Activity {
 				message("Report failed to submit");
 			}
 			//message("Json "+json+" Response "+response.getStatusLine().getStatusCode()+" "+response.getStatusLine().getReasonPhrase());
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+		} catch (org.apache.http.conn.HttpHostConnectException e) {
+			message("Connection refused");
+		} catch (ClientProtocolException e) {
+			message("ClientProtocolException");
+		} catch (IOException e) {
+			message("IO Exception");
 		}
 	}
+	
 	private void message(String string) {
 		Toast.makeText(this, string, Toast.LENGTH_LONG).show();
 	}
